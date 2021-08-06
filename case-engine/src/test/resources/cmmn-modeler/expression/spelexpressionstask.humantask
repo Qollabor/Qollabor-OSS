@@ -1,0 +1,8 @@
+<humantask>
+    <qollabor:implementation xmlns:qollabor="org.qollabor" class="org.qollabor.cmmn.definition.task.WorkflowTaskDefinition" name="SpelExpressionsTask" description="">
+        <input id="_f5oP_HumanTaskInput" name="HumanTaskInput"/>
+        <output id="_9oOB_TaskOutput" name="Output"/>
+        <output id="_x59I_SpecialOutput" name="SpecialOutput"/>
+        <task-model/>
+    </qollabor:implementation>
+</humantask>

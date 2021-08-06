@@ -1,0 +1,143 @@
+version: '3.1'
+services:
+
+  sql-server:
+    image: batav/circle-ci:sqlserver-event-data
+    labels:
+      component: qollabor-sql-server
+    network_mode: host
+    expose:
+      - 1433
+    ports:
+      - "1433:1433"
+    hostname: sql-server
+    container_name: sql-server
+    environment:
+      SA_PASSWORD: Abc_123456
+      ACCEPT_EULA: Y
+      QUERY_DB: qollaborQuery
+      EVENT_DB: qollaborEventstore
+
+  qollabor-event-db:
+    image: batav/circle-ci:postgres-event-data
+    networks:
+      - dev
+    expose:
+      - 5432
+    ports:
+      - "5431:5432"
+    hostname: qollabor-event-db
+    container_name: qollabor-event-db
+    environment:
+      POSTGRES_USER: postgresuser
+      POSTGRES_PASSWORD: mysecret
+      POSTGRES_DB: qollabor-eventstore
+      PGDATA: event-data
+
+  qollabor-query-db:
+    image: postgres:12.1-alpine
+    networks:
+      - dev
+    expose:
+      - 5432
+    ports:
+      - "5430:5432"
+    hostname: qollabor-query-db
+    container_name: qollabor-query-db
+    environment:
+      POSTGRES_USER: postgresuser
+      POSTGRES_PASSWORD: mysecret
+      POSTGRES_DB: qollabor-query
+
+  qollabor-test-token-service:
+    image: spectare/oidc-token-test-service:latest
+    labels:
+      component: idp-test-service-for-qollabor
+    network_mode: host
+    expose:
+      - 2377
+    ports:
+      - "2377:2377"
+    hostname: qollabor-test-token-service
+    container_name: qollabor-test-token-service
+    environment:
+      BIND: 0.0.0.0
+      PORT: 2377
+
+  qollabor-sqlserver:
+    image: qollabor/engine:latest
+    labels:
+      component: qollabor-engine
+    network_mode: host
+    expose:
+      - 2027
+    ports:
+      - "2027:2027"
+    hostname: qollabor-sqlserver
+    container_name: qollabor
+    restart: on-failure
+    environment:
+      EVENT_DB_PROFILE: ${EVENT_DB_PROFILE:-slick.jdbc.SQLServerProfile$}
+      EVENT_DB_DRIVER: ${EVENT_DB_DRIVER:-com.microsoft.sqlserver.jdbc.SQLServerDriver}
+      EVENT_DB_USER: ${EVENT_DB_USER:-SA}
+      EVENT_DB_PASSWORD: ${EVENT_DB_PASSWORD:-Abc_123456}
+      EVENT_DB_URL: ${EVENT_DB_URL:-jdbc:sqlserver://localhost:1433;DatabaseName=qollaborEventstore;}
+      PROJECTION_DB_PROFILE: ${PROJECTION_DB_PROFILE:-slick.jdbc.SQLServerProfile$}
+      PROJECTION_DB_DRIVER: ${PROJECTION_DB_DRIVER:-com.microsoft.sqlserver.jdbc.SQLServerDriver}
+      PROJECTION_DB_USER: ${PROJECTION_DB_USER:-SA}
+      PROJECTION_DB_PASSWORD: ${PROJECTION_DB_PASSWORD:-Abc_123456}
+      PROJECTION_DB_URL: ${PROJECTION_DB_URL:-jdbc:sqlserver://localhost:1433;DatabaseName=qollaborQuery;}
+    healthcheck:
+      test: ["CMD", "wget", "-s", "http://localhost:2027/api-docs/swagger.json"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - /home/circleci/qollabor-engine/.circleci/run/qollabor/journal:/opt/qollabor/journal
+      - /home/circleci/qollabor-engine/.circleci/target/definitions:/opt/qollabor/definitions
+      - /home/circleci/qollabor-engine/.circleci/src/jdbc-conf:/opt/qollabor/conf
+      - /home/circleci/qollabor-engine/.circleci/src/bootstrap:/opt/qollabor/bootstrap
+    depends_on:
+      - sql-server
+      - qollabor-test-token-service
+
+  qollabor-postgres:
+    image: qollabor/engine:latest
+    labels:
+      component: qollabor-engine
+    network_mode: host
+    expose:
+      - 2027
+    ports:
+      - "2027:2027"
+    hostname: qollabor-postgres
+    container_name: qollabor
+    environment:
+      EVENT_DB_PROFILE: ${EVENT_DB_PROFILE:-slick.jdbc.PostgresProfile$}
+      EVENT_DB_DRIVER: ${EVENT_DB_DRIVER:-org.postgresql.Driver}
+      EVENT_DB_USER: ${EVENT_DB_USER:-postgresuser}
+      EVENT_DB_PASSWORD: ${EVENT_DB_PASSWORD:-mysecret}
+      EVENT_DB_URL: ${EVENT_DB_URL:-jdbc:postgresql://localhost:5431/qollabor-eventstore?reWriteBatchedInserts=true}
+      PROJECTION_DB_PROFILE: ${PROJECTION_DB_PROFILE:-slick.jdbc.PostgresProfile$}
+      PROJECTION_DB_DRIVER: ${PROJECTION_DB_DRIVER:-org.postgresql.Driver}
+      PROJECTION_DB_USER: ${PROJECTION_DB_USER:-postgresuser}
+      PROJECTION_DB_PASSWORD: ${PROJECTION_DB_PASSWORD:-mysecret}
+      PROJECTION_DB_URL: ${PROJECTION_DB_URL:-jdbc:postgresql://localhost:5430/qollabor-query?reWriteBatchedInserts=true}
+    healthcheck:
+      test: ["CMD", "wget", "-s", "http://localhost:2027/api-docs/swagger.json"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - /home/circleci/qollabor-engine/.circleci/run/qollabor/journal:/opt/qollabor/journal
+      - /home/circleci/qollabor-engine/.circleci/target/definitions:/opt/qollabor/definitions
+      - /home/circleci/qollabor-engine/.circleci/src/jdbc-conf:/opt/qollabor/conf
+      - /home/circleci/qollabor-engine/.circleci/src/bootstrap:/opt/qollabor/bootstrap
+    depends_on:
+      - qollabor-event-db
+      - qollabor-query-db
+      - qollabor-test-token-service
+
+networks:
+  dev:
+    driver: bridge

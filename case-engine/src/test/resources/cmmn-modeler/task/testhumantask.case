@@ -1,0 +1,45 @@
+<case id="TestHumanTask.case" name="TestHumanTask" guid="_kBPkc">
+    <caseFileModel>
+        <caseFileItem id="_kBPkc_0" name="TaskInput" multiplicity="ExactlyOne" definitionRef="string.cfid">
+            <children>
+                <caseFileItem id="_kBPkc_1" name="DueDate" multiplicity="ExactlyOne" definitionRef="string.cfid"/>
+                <caseFileItem id="_kBPkc_2" name="Assignee" multiplicity="ExactlyOne" definitionRef="string.cfid"/>
+                <caseFileItem id="_kBPkc_3" name="Content" multiplicity="ExactlyOne" definitionRef="string.cfid">
+                    <children>
+                        <caseFileItem id="_kBPkc_4" name="Subject" multiplicity="ExactlyOne" definitionRef="string.cfid"/>
+                        <caseFileItem id="_kBPkc_5" name="Decision" multiplicity="ExactlyOne" definitionRef="string.cfid"/>
+                    </children>
+                </caseFileItem>
+            </children>
+        </caseFileItem>
+    </caseFileModel>
+    <casePlanModel id="cm__kBPkc_0" name="TestHumanTask" autoComplete="true">
+        <planItem id="pi_ht__kBPkc_0" name="HumanTask" definitionRef="ht__kBPkc_0"/>
+        <humanTask id="ht__kBPkc_0" name="HumanTask" isBlocking="true">
+            <inputs id="_kBPkc_18" name="TaskInputParameter" bindingRef="_kBPkc_0"/>
+            <outputs id="_kBPkc_15" name="TaskOutputParameter" bindingRef="_kBPkc_5"/>
+            <extensionElements mustUnderstand="false">
+                <qollabor:implementation xmlns:qollabor="org.qollabor" humanTaskRef="humanTaskTest.humantask">
+                    <parameterMapping id="_kBPkc_14" sourceRef="_kBPkc_18" targetRef="_67M8_Content">
+                        <transformation id="_kBPkc_20" language="spel">
+                            <body>
+                                <![CDATA[TaskInputParameter.Content]]>
+                            </body>
+                        </transformation>
+                    </parameterMapping>
+                    <parameterMapping id="_kBPkc_16" sourceRef="_DtOu_Decision" targetRef="_kBPkc_15">
+                        <transformation id="_kBPkc_21" language="spel">
+                            <body>
+                                <![CDATA[Decision]]>
+                            </body>
+                        </transformation>
+                    </parameterMapping>
+                </qollabor:implementation>
+            </extensionElements>
+        </humanTask>
+    </casePlanModel>
+    <caseRoles id="_kBPkc_17" name="ADMIN">
+        <role id="_kBPkc_17" name="ADMIN"/>
+    </caseRoles>
+    <input id="_kBPkc_22" name="TaskInput" bindingRef="_kBPkc_0"/>
+</case>

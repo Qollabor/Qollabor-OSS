@@ -1,0 +1,338 @@
+version: 2.1
+jobs:
+  master-build:
+    working_directory: ~/qollabor-engine
+    machine:
+      image: ubuntu-1604:202007-01
+    resource_class: medium
+    steps:
+      - checkout
+      - run:
+          name: Updating Java and sbt versions
+          command: |
+            sudo apt-get update
+            sudo apt install openjdk-11-jdk
+            sudo update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java
+            java -version
+            SBT_VERSION=$(awk -F"=" '/sbt.version/{print $NF}' project/build.properties)
+            wget https://dl.bintray.com/sbt/debian/sbt-$SBT_VERSION.deb
+            sudo dpkg -i sbt-$SBT_VERSION.deb
+            sbt sbtVersion
+            echo 'export NVM_DIR="/opt/circleci/.nvm"' >> $BASH_ENV
+            echo ' [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
+      - run:
+          name: Updating node version to 10.22.0
+          command: |
+            nvm install v10.22.0
+            nvm alias default v10.22.0
+            node -v
+      - run:
+          name: Compile code
+          command: sbt compile
+      - run:
+          name: Unit tests
+          command: sbt test
+      - run:
+          name: Docker login
+          command: echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+#      - run:
+#          name: Pull DB and IDP docker images
+#          command: |
+#            docker pull cassandra:3.11
+#            docker pull postgres:12.1-alpine
+#            docker pull batav/circle-ci:postgres-event-data
+#            docker pull batav/circle-ci:sqlserver-event-data
+#            docker pull spectare/oidc-token-test-service:latest
+      - run:
+          name: Build qollabor docker image
+          command: sbt docker:publishLocal
+
+      # By the time of cassandra, sql-server, postgres testing, all the below containers will be up.
+#      - run:
+#          name: Start DB and IDP containers
+#          command: |
+#            docker-compose -f .circleci/docker-test-jdbc-master.yml up -d sql-server qollabor-event-db qollabor-query-db
+#            docker-compose -f .circleci/docker-test-cassandra.yml up -d cassandra postgres
+#            docker-compose -f .circleci/docker-test-inmemory.yml up -d qollabor-test-token-service
+#
+#      # Starting docker environment for In-memory testing
+#      - run:
+#          name: Up the containers for In-memory testing
+#          command: |
+#            docker-compose -f .circleci/docker-test-inmemory.yml up -d qollabor
+#            sleep 10
+#      - run:
+#          name: Give permissions
+#          command: sudo chmod -R 777 ./
+#      - run:
+#          name: Docker logs of engine
+#          command: docker logs qollabor
+#      - run:
+#          name: Stop the qollabor container
+#          command: docker rm -f qollabor
+#
+#      # Starting docker environment for Postgresql testing against latest engine
+#      - run:
+#          name: Up the containers for backwards compatibility Postgresql testing
+#          command: |
+#            sudo docker-compose -f .circleci/docker-test-jdbc-master.yml up -d qollabor-postgres
+#            sleep 10
+#      - run:
+#          name: Docker logs of engine
+#          command: docker logs qollabor
+#      - run:
+#          name: Stop the containers
+#          command: docker rm -f qollabor qollabor-event-db qollabor-query-db
+#
+#      # Starting docker environment for Sqlserver testing against latest engine
+#      - run:
+#          name: Up the containers for backwards compatibility Sqlserver testing
+#          command: |
+#            sudo docker-compose -f .circleci/docker-test-jdbc-master.yml up -d qollabor-sqlserver
+#            sleep 10
+#      - run:
+#          name: Docker logs of engine
+#          command: docker logs qollabor
+#      - run:
+#          name: Stop the containers
+#          command: docker rm -f qollabor sql-server
+#
+#      # Starting docker environment for Cassandra testing
+#      - run:
+#          name: Up the containers for Cassandra testing
+#          command: |
+#            sudo docker-compose -f .circleci/docker-test-cassandra.yml up -d qollabor
+#            sleep 10
+#      - run:
+#          name: Docker logs of engine
+#          command: docker logs qollabor
+#      - run:
+#          name: Docker logs of engine
+#          command: docker logs qollabor
+#          when: on_fail
+#      - run:
+#          name: Stop the containers
+#          command: docker rm -f qollabor cassandra postgres qollabor-test-token-service
+      - run:
+          name: Push qollabor image to docker hub
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ];
+            then
+              echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+              docker push qollabor/engine:latest
+            else
+              echo "Not pushing image to docker hub"
+            fi
+
+  branch-build:
+    working_directory: ~/qollabor-engine
+    machine:
+      image: ubuntu-1604:202007-01
+    resource_class: medium
+    steps:
+      - checkout
+      - run:
+          name: Updating Java and sbt versions
+          command: |
+            sudo apt-get update
+            sudo apt install openjdk-11-jdk
+            sudo update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java
+            java -version
+            SBT_VERSION=$(awk -F"=" '/sbt.version/{print $NF}' project/build.properties)
+            wget https://dl.bintray.com/sbt/debian/sbt-$SBT_VERSION.deb
+            sudo dpkg -i sbt-$SBT_VERSION.deb
+            sbt sbtVersion
+            echo 'export NVM_DIR="/opt/circleci/.nvm"' >> $BASH_ENV
+            echo ' [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
+      - run:
+          name: Updating node version to 10.22.0
+          command: |
+            nvm install v10.22.0
+            nvm alias default v10.22.0
+            node -v
+      - run:
+          name: Compile code
+          command: sbt compile
+      - run:
+          name: Unit tests
+          command: sbt test
+      - run:
+          name: Docker login
+          command: echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+      - run:
+          name: Pull IDP docker image
+          command: docker pull spectare/oidc-token-test-service:latest
+      - run:
+          name: Build qollabor docker image
+          command: sbt docker:publishLocal
+
+      # Starting docker environment for In-memory testing
+      - run:
+          name: Up the containers for In-memory testing
+          command: |
+            sudo docker-compose -f .circleci/docker-test-inmemory.yml up -d
+            sleep 10
+      - run:
+          name: Give permissions
+          command: sudo chmod -R 777 ./
+      - run:
+          name: Docker logs of engine
+          command: docker logs qollabor
+      - run:
+          name: Docker logs of engine
+          command: docker logs qollabor
+          when: on_fail
+      - run:
+          name: Stop the containers
+          command: |
+            docker-compose -f .circleci/docker-test-inmemory.yml stop
+            docker rm $(docker ps -a -q)
+
+  release-build:
+    working_directory: ~/qollabor-engine
+    machine:
+      image: ubuntu-1604:202007-01
+    resource_class: medium
+    steps:
+      - checkout
+      - run:
+          name: Updating Java and sbt versions
+          command: |
+            sudo apt-get update
+            sudo apt install openjdk-11-jdk
+            sudo update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java
+            java -version
+            SBT_VERSION=$(awk -F"=" '/sbt.version/{print $NF}' project/build.properties)
+            wget https://dl.bintray.com/sbt/debian/sbt-$SBT_VERSION.deb
+            sudo dpkg -i sbt-$SBT_VERSION.deb
+            sbt sbtVersion
+            echo 'export NVM_DIR="/opt/circleci/.nvm"' >> $BASH_ENV
+            echo ' [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
+      - run:
+          name: Updating node version to 10.22.0
+          command: |
+            nvm install v10.22.0
+            nvm alias default v10.22.0
+            node -v
+      - run:
+          name: Check for version TAG
+          command: |
+            echo `git describe --tags --exact-match` > ./version.txt
+            cat ./version.txt
+            TAG=$(cat ./version.txt)
+      - run:
+          name: Compile code
+          command: sbt compile
+      - run:
+          name: Unit tests
+          command: sbt test
+      - run:
+          name: Docker login
+          command: echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+      - run:
+          name: Pull DB and IDP docker images
+          command: |
+            docker pull cassandra:3.11
+            docker pull postgres:12.1-alpine
+            docker pull batav/circle-ci:sqlserver
+            docker pull spectare/oidc-token-test-service:latest
+      - run:
+          name: Build qollabor docker image
+          command: sbt docker:publishLocal
+
+      # By the time of cassandra, sql-server, postgres testing, all the below containers will be up.
+      - run:
+          name: Start DB and IDP containers
+          command: |
+            docker-compose -f .circleci/docker-test-jdbc-release.yml up -d sql-server qollabor-event-db qollabor-query-db
+            docker-compose -f .circleci/docker-test-cassandra.yml up -d cassandra postgres
+            docker-compose -f .circleci/docker-test-inmemory.yml up -d qollabor-test-token-service
+
+      # Starting docker environment for In-memory testing
+      - run:
+          name: Up the containers for In-memory testing
+          command: |
+            docker-compose -f .circleci/docker-test-inmemory.yml up -d qollabor
+            sleep 10
+      - run:
+          name: Give permissions
+          command: sudo chmod -R 777 ./
+      - run:
+          name: Docker logs of engine
+          command: docker logs qollabor
+      - run:
+          name: Stop the qollabor container
+          command: docker rm -f qollabor
+
+      # Starting docker environment for Postgresql testing
+      - run:
+          name: Up the containers for Postgresql testing
+          command: |
+            sudo docker-compose -f .circleci/docker-test-jdbc-release.yml up -d qollabor-postgres
+            sleep 10
+      - run:
+          name: Docker logs of engine
+          command: docker logs qollabor
+      - run:
+          name: Stop the containers
+          command: docker rm -f qollabor qollabor-event-db qollabor-query-db
+
+      # Starting docker environment for Sqlserver testing
+      - run:
+          name: Up the containers for Sqlserver testing
+          command: |
+            sudo docker-compose -f .circleci/docker-test-jdbc-release.yml up -d qollabor-sqlserver
+            sleep 10
+      - run:
+          name: Docker logs of engine
+          command: docker logs qollabor
+      - run:
+          name: Stop the containers
+          command: docker rm -f qollabor sql-server
+
+      # Starting docker environment for Cassandra testing
+      - run:
+          name: Up the containers for Cassandra testing
+          command: |
+            sudo docker-compose -f .circleci/docker-test-cassandra.yml up -d qollabor
+            sleep 10
+      - run:
+          name: Docker logs of engine
+          command: docker logs qollabor
+      - run:
+          name: Docker logs of engine
+          command: docker logs qollabor
+          when: on_fail
+      - run:
+          name: Stop the containers
+          command: docker rm -f qollabor cassandra postgres qollabor-test-token-service
+      - run:
+          name: Push qollabor image to docker hub
+          command: |
+            echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+            docker tag qollabor/engine:latest qollabor/engine:$CIRCLE_TAG
+            docker push qollabor/engine:$CIRCLE_TAG
+
+
+workflows:
+  version: 2
+  ci:
+    jobs:
+      - master-build:
+          filters:
+            branches:
+              only:
+                - master
+                - dependency-updates
+      - branch-build:
+          filters:
+            branches:
+              ignore:
+                - master
+                - dependency-updates
+      - release-build:
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              ignore: /.*/

@@ -1,0 +1,12 @@
+<process name="humantaskvalidator" description="" id="humantaskvalidator.process">
+    <extensionElements>
+        <qollabor:implementation xmlns:qollabor="org.qollabor" async="false" class="org.qollabor.processtask.implementation.http.HTTPCallDefinition">
+            <url>http://localhost:17382/validate</url>
+            <method>POST</method>
+            <http-headers>
+                <http-header name="Accept">application/json</http-header>
+            </http-headers>
+            <post-content/>
+        </qollabor:implementation>
+    </extensionElements>
+</process>

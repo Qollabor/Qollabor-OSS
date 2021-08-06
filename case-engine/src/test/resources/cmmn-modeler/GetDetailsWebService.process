@@ -1,0 +1,19 @@
+<process name="GetDetailsWebService" implementationType="http://www.omg.org/spec/CMMN/ProcessType/Unspecified">
+    <input name="httpPort"/>
+    <input name="detailsId"/>
+    <output name="details"/>
+    <extensionElements>
+        <qollabor:implementation xmlns:qollabor="org.qollabor" class="org.qollabor.processtask.implementation.http.HTTPCallDefinition">
+            <url>http://localhost:${httpPort}/details/${detailsId}</url>
+            <method>GET</method>
+            <http-headers>
+                <http-header name="Accept">application/json</http-header>
+            </http-headers>
+            <parameterMapping sourceRef="responsePayload" targetRef="details">
+                <transformation language="json">
+                    <body>$.._2</body>
+                </transformation>
+            </parameterMapping>
+        </qollabor:implementation>
+    </extensionElements>
+</process>

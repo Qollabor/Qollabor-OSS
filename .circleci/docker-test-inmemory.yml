@@ -1,0 +1,41 @@
+version: '3.1'
+services:
+
+  qollabor-test-token-service:
+    image: spectare/oidc-token-test-service:latest
+    labels:
+      component: idp-test-service-for-qollabor
+    network_mode: host
+    expose:
+      - 2377
+    ports:
+      - "2377:2377"
+    hostname: qollabor-test-token-service
+    container_name: qollabor-test-token-service
+    environment:
+      BIND: 0.0.0.0
+      PORT: 2377
+
+  qollabor:
+    image: qollabor/engine:latest
+    labels:
+      component: qollabor-engine
+    network_mode: host
+    expose:
+      - 2027
+    ports:
+      - "2027:2027"
+    hostname: qollabor
+    container_name: qollabor
+    healthcheck:
+      test: ["CMD", "wget", "-s", "http://localhost:2027/api-docs/swagger.json"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - /home/circleci/qollabor-engine/.circleci/run/qollabor/journal:/opt/qollabor/journal
+      - /home/circleci/qollabor-engine/.circleci/target/definitions:/opt/qollabor/definitions
+      - /home/circleci/qollabor-engine/.circleci/src/inmemory-conf:/opt/qollabor/conf
+      - /home/circleci/qollabor-engine/.circleci/src/bootstrap:/opt/qollabor/bootstrap
+    depends_on:
+      - qollabor-test-token-service

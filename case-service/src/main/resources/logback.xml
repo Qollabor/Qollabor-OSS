@@ -1,0 +1,27 @@
+<configuration scan="true">
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%date|%-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <logger name="akka.cluster.ClusterHeartbeatSender"    level="WARN" />
+    <logger name="akka.cluster.ClusterCoreDaemon" level="WARN" />
+    <logger name="akka.serialization" level="WARN" />
+    <logger name="org.qollabor" level="WARN" />
+<!--        <logger name="org.qollabor.cmmn"    level="DEBUG" />-->
+<!--        <logger name="org.qollabor.service"    level="DEBUG" />-->
+    <logger name="com.datastax" level="WARN"/>
+    <logger name="com.wordnik" level="ERROR"/>
+    <logger name="com.gettyimages" level="ERROR"/>
+    <logger name="akka.persistence.query.journal.leveldb" level="INFO"/>
+    <logger name="akka.persistence.cassandra" level="INFO"/>
+    <logger name="slick" level="INFO"/>
+<!--    <logger name="slick.basic.BasicBackend.action" level="DEBUG"/>-->
+<!--    <logger name="slick.jdbc.JdbcBackend.statement" level="DEBUG"/>-->
+    <!--<logger name="slick.jdbc.JdbcBackend.statementAndParameter" level="DEBUG"/>-->
+    <!--<logger name="slick.jdbc.JdbcBackend.parameter" level="DEBUG"/>-->
+    <logger name="org.flywaydb" level="INFO"/>
+    <root level="INFO">
+        <appender-ref ref="console"/>
+    </root>
+</configuration>

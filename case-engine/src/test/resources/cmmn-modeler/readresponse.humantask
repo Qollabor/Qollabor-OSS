@@ -1,0 +1,49 @@
+<humantask>
+    <qollabor:implementation name="undefined" xmlns:qollabor="org.qollabor" class="org.qollabor.cmmn.definition.task.WorkflowTaskDefinition">
+        <documentation textFormat="text/plain">
+            <text>
+                <![CDATA[undefined]]>
+            </text>
+        </documentation>
+        <input id="Response" name="Response"/>
+        <task-model>
+			{
+				"schema": {
+					"title": "Read response",
+					"type": "object",
+					"properties": {
+						"Response": {
+							"title": "Your response",
+							"type": "object",
+							"properties": {
+								"Message": {
+									"type": "string",
+									"title": "Your response message"
+								},
+								"Date": {
+									"type": "string",
+									"format": "date",
+									"title": "Pick a date"
+								},
+								"Time": {
+									"type": "string",
+									"format": "time",
+									"title": "Pick a time"
+								},
+								"SomeBoolean": {
+									"type": "boolean",
+									"title": "Check this"
+								}
+							}
+						}
+					}
+				},
+				"uiSchema": {
+					"Message": {
+						"ui:widget": "textarea"
+					}
+				}
+			}
+		</task-model>
+    </qollabor:implementation>
+</humantask>

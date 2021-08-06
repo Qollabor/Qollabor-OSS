@@ -1,0 +1,7 @@
+<humantask>
+    <qollabor:implementation xmlns:qollabor="org.qollabor" class="org.qollabor.cmmn.definition.task.WorkflowTaskDefinition" name="simplehumantask" description="">
+        <input id="_Hun3_Input" name="Input"/>
+        <output id="_SkQG_Result" name="Result"/>
+        <task-model/>
+    </qollabor:implementation>
+</humantask>

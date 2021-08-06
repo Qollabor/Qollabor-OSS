@@ -1,0 +1,14 @@
+<process name="AssertMockServiceIsRunning" description="">
+    <output id="_Wddw_responseCode" name="responseCode"/>
+    <input id="_FC9h_httpPort" name="httpPort"/>
+    <extensionElements>
+        <qollabor:implementation xmlns:qollabor="org.qollabor" async="false" class="org.qollabor.processtask.implementation.http.HTTPCallDefinition">
+            <url>http://localhost:${httpPort}/ping</url>
+            <method>GET</method>
+            <http-headers>
+                <http-header name="Accept">application/json</http-header>
+            </http-headers>
+            <parameterMapping sourceRef="responseCode" targetRef="responseCode"/>
+        </qollabor:implementation>
+    </extensionElements>
+</process>

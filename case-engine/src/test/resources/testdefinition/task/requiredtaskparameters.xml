@@ -1,0 +1,139 @@
+<definitions>
+    <case id="task/requiredtaskparameters.case" name="RequiredTaskParameters">
+        <caseFileModel>
+            <caseFileItem id="cfi_csNY8_0" name="Root" multiplicity="ExactlyOne" definitionRef="root.cfid"/>
+        </caseFileModel>
+        <casePlanModel id="cm_RequiredTaskParameters.case_RequiredTaskParameters_0" name="RequiredTaskParameters" autoComplete="true">
+            <planItem id="cm_cssni_41" name="TaskRequiredOutput" definitionRef="pid_cm_cssni_41"/>
+            <planItem id="cm_csNY8_47" name="TaskRequiredOutputWithBinding" definitionRef="pid_cm_csNY8_47"/>
+            <planItem id="cm_csNY8_49" name="TaskWithOutputNotRequired" definitionRef="pid_cm_csNY8_49"/>
+            <planItem id="cm_csa4I_58" name="TaskWithOutputNotRequiredAndBinding" definitionRef="pid_cm_csa4I_58"/>
+            <humanTask id="pid_cm_cssni_41" name="TaskRequiredOutput" isBlocking="true">
+                <inputs id="_p5SZA_1" name="Input"/>
+                <outputs id="_6xePv" name="Result">
+                    <extensionElements mustUnderstand="false">
+                        <qollabor:implementation xmlns:qollabor="org.qollabor" required="true"/>
+                    </extensionElements>
+                </outputs>
+                <extensionElements mustUnderstand="false">
+                    <qollabor:implementation xmlns:qollabor="org.qollabor" class="org.qollabor.cmmn.definition.task.WorkflowTaskDefinition" name="simplehumantask" description="" humanTaskRef="task/simplehumantask.humantask">
+                        <input id="_Hun3_Input" name="Input"/>
+                        <output id="_SkQG_Result" name="Result"/>
+                        <task-model/>
+                        <assignment id="_p5SZA_22">
+                            <condition id="_p5SZA_23" language="spel">
+                                <body>
+                                    <![CDATA[user.id]]>
+                                </body>
+                            </condition>
+                        </assignment>
+                        <parameterMapping id="_6oZPT" sourceRef="_SkQG_Result" targetRef="_6xePv"/>
+                        <parameterMapping id="_p5SZA_2" sourceRef="_p5SZA_1" targetRef="_Hun3_Input"/>
+                    </qollabor:implementation>
+                </extensionElements>
+            </humanTask>
+            <humanTask id="pid_cm_csNY8_47" name="TaskRequiredOutputWithBinding" isBlocking="true">
+                <inputs id="_p5SZA_4" name="Input"/>
+                <outputs id="_epnJX" name="Result" bindingRef="cfi_csNY8_0">
+                    <extensionElements mustUnderstand="false">
+                        <qollabor:implementation xmlns:qollabor="org.qollabor" required="true"/>
+                    </extensionElements>
+                </outputs>
+                <extensionElements mustUnderstand="false">
+                    <qollabor:implementation xmlns:qollabor="org.qollabor" class="org.qollabor.cmmn.definition.task.WorkflowTaskDefinition" name="simplehumantask" description="" humanTaskRef="task/simplehumantask.humantask">
+                        <input id="_Hun3_Input" name="Input"/>
+                        <output id="_SkQG_Result" name="Result"/>
+                        <task-model/>
+                        <assignment id="_p5SZA_20">
+                            <condition id="_p5SZA_21" language="spel">
+                                <body>
+                                    <![CDATA[user.id]]>
+                                </body>
+                            </condition>
+                        </assignment>
+                        <parameterMapping id="_9RcDI" sourceRef="_SkQG_Result" targetRef="_epnJX"/>
+                        <parameterMapping id="_p5SZA_5" sourceRef="_p5SZA_4" targetRef="_Hun3_Input"/>
+                    </qollabor:implementation>
+                </extensionElements>
+            </humanTask>
+            <humanTask id="pid_cm_csNY8_49" name="TaskWithOutputNotRequired" isBlocking="true">
+                <inputs id="_p5SZA_7" name="Input"/>
+                <outputs id="_VsVwA" name="Result"/>
+                <extensionElements mustUnderstand="false">
+                    <qollabor:implementation xmlns:qollabor="org.qollabor" class="org.qollabor.cmmn.definition.task.WorkflowTaskDefinition" name="simplehumantask" description="" humanTaskRef="task/simplehumantask.humantask">
+                        <input id="_Hun3_Input" name="Input"/>
+                        <output id="_SkQG_Result" name="Result"/>
+                        <task-model/>
+                        <assignment id="_p5SZA_18">
+                            <condition id="_p5SZA_19" language="spel">
+                                <body>
+                                    <![CDATA[user.id]]>
+                                </body>
+                            </condition>
+                        </assignment>
+                        <parameterMapping id="_bW3g9" sourceRef="_SkQG_Result" targetRef="_VsVwA"/>
+                        <parameterMapping id="_p5SZA_8" sourceRef="_p5SZA_7" targetRef="_Hun3_Input"/>
+                    </qollabor:implementation>
+                </extensionElements>
+            </humanTask>
+            <humanTask id="pid_cm_csa4I_58" name="TaskWithOutputNotRequiredAndBinding" isBlocking="true">
+                <inputs id="_p5SZA_10" name="Input"/>
+                <outputs id="_75v4Z" name="Result" bindingRef="cfi_csNY8_0"/>
+                <extensionElements mustUnderstand="false">
+                    <qollabor:implementation xmlns:qollabor="org.qollabor" class="org.qollabor.cmmn.definition.task.WorkflowTaskDefinition" name="simplehumantask" description="" humanTaskRef="task/simplehumantask.humantask">
+                        <input id="_Hun3_Input" name="Input"/>
+                        <output id="_SkQG_Result" name="Result"/>
+                        <task-model/>
+                        <assignment id="_p5SZA_16">
+                            <condition id="_p5SZA_17" language="spel">
+                                <body>
+                                    <![CDATA[user.id]]>
+                                </body>
+                            </condition>
+                        </assignment>
+                        <parameterMapping id="_1jW2A" sourceRef="_SkQG_Result" targetRef="_75v4Z">
+                            <transformation language="spel">
+                                <body>
+                                    <![CDATA[Result.Outcome * 2]]>
+                                </body>
+                            </transformation>
+                        </parameterMapping>
+                        <parameterMapping id="_p5SZA_11" sourceRef="_p5SZA_10" targetRef="_Hun3_Input"/>
+                    </qollabor:implementation>
+                </extensionElements>
+            </humanTask>
+        </casePlanModel>
+        <extensionElements mustUnderstand="false">
+            <qollabor:start-case-model xmlns:qollabor="org.qollabor">{
+  "schema":{
+    "title": "",
+    "type": "object",
+    "properties":{
+    }
+  }
+}</qollabor:start-case-model>
+        </extensionElements>
+    </case>
+    <caseFileItemDefinition name="root" definitionType="http://www.omg.org/spec/CMMN/DefinitionType/Unspecified" id="root.cfid">
+        <property name="Outcome" type="http://www.omg.org/spec/CMMN/PropertyType/integer"/>
+    </caseFileItemDefinition>
+    <CMMNDI>
+        <CMMNDiagram>
+            <CMMNShape cmmnElementRef="cm_RequiredTaskParameters.case_RequiredTaskParameters_0">
+                <Bounds x="10" y="10" width="1222" height="1165"/>
+            </CMMNShape>
+            <CMMNShape cmmnElementRef="cm_cssni_41">
+                <Bounds x="190" y="140" width="100" height="60"/>
+            </CMMNShape>
+            <CMMNShape cmmnElementRef="cm_csNY8_47">
+                <Bounds x="190" y="270" width="100" height="60"/>
+            </CMMNShape>
+            <CMMNShape cmmnElementRef="cm_csNY8_49">
+                <Bounds x="186" y="403" width="100" height="60"/>
+            </CMMNShape>
+            <CMMNShape cmmnElementRef="cm_csa4I_58">
+                <Bounds x="188" y="519" width="100" height="60"/>
+            </CMMNShape>
+        </CMMNDiagram>
+    </CMMNDI>
+</definitions>

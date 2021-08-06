@@ -1,0 +1,76 @@
+version: '3.1'
+services:
+
+  cassandra:
+    image: cassandra:3.11
+    labels:
+      component: event-store
+    network_mode: host
+    expose:
+      - 9042
+    ports:
+      - "9042:9042"
+    container_name: cassandra
+    healthcheck:
+      test: ["CMD", "cqlsh", "--execute", "show version;quit"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  postgres:
+    image: postgres:12.1-alpine
+    network_mode: host
+    expose:
+      - 5432
+    ports:
+      - "5432:5432"
+    hostname: postgres
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgresuser
+      POSTGRES_PASSWORD: mysecret
+      POSTGRES_DB: qollabor-query
+
+  qollabor-test-token-service:
+    image: spectare/oidc-token-test-service:latest
+    labels:
+      component: idp-test-service-for-qollabor
+    network_mode: host
+    expose:
+      - 2377
+    ports:
+      - "2377:2377"
+    hostname: qollabor-test-token-service
+    container_name: qollabor-test-token-service
+    environment:
+      BIND: 0.0.0.0
+      PORT: 2377
+
+  qollabor:
+    image: qollabor/engine:latest
+    labels:
+      component: qollabor-engine
+    network_mode: host
+    expose:
+      - 2027
+    ports:
+      - "2027:2027"
+    hostname: qollabor
+    container_name: qollabor
+    environment:
+      CS_HOST: ${CS_HOST:-127.0.0.1}
+      PROJECTION_DB_URL: ${PROJECTION_DB_URL:-jdbc:postgresql://127.0.0.1:5432/qollabor-query?reWriteBatchedInserts=true}
+    healthcheck:
+      test: ["CMD", "wget", "-s", "http://localhost:2027/api-docs/swagger.json"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - /home/circleci/qollabor-engine/.circleci/run/qollabor/journal:/opt/qollabor/journal
+      - /home/circleci/qollabor-engine/.circleci/target/definitions:/opt/qollabor/definitions
+      - /home/circleci/qollabor-engine/.circleci/src/cassandra-conf:/opt/qollabor/conf
+      - /home/circleci/qollabor-engine/.circleci/src/bootstrap:/opt/qollabor/bootstrap
+    depends_on:
+      - cassandra
+      - postgres
+      - qollabor-test-token-service

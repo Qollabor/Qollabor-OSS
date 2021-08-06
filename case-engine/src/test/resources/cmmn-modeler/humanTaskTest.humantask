@@ -1,0 +1,8 @@
+<humantask>
+    <qollabor:implementation xmlns:qollabor="org.qollabor" class="org.qollabor.cmmn.definition.task.WorkflowTaskDefinition" name="humanTaskTest" description="">
+        <input id="_ydL3_Owner" name="Owner"/>
+        <input id="_67M8_Content" name="Content"/>
+        <output id="_DtOu_Decision" name="Decision"/>
+        <task-model> { "JSONSchema" : "Some schema in here" }</task-model>
+    </qollabor:implementation>
+</humantask>
